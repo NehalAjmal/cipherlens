@@ -1,0 +1,34 @@
+# CipherLens — requirements.txt
+# All dependencies are free, open-source, and require no API key or account.
+# See docs/TRD.md §2 for the full audit of each library.
+#
+# Install: pip install -r requirements.txt
+# For offline/air-gapped install: see docs/HUMAN_TASKS.md (wheelhouse method).
+
+# --- Core ML / CV ---
+torch>=2.2.0
+torchvision>=0.17.0
+onnxruntime>=1.18.0
+onnx>=1.15.0
+adversarial-robustness-toolbox>=1.17.0
+alibi-detect>=0.12.0
+scikit-learn>=1.4.0
+scipy>=1.11.0
+numpy>=1.26.0
+opencv-python-headless>=4.9.0
+ImageHash>=4.3.1
+pillow>=10.0.0
+
+# --- Crypto & integrity ---
+cryptography>=42.0.0
+
+# --- UI ---
+streamlit>=1.32.0
+
+# --- Validation & config ---
+jsonschema>=4.21.0
+pydantic>=2.6.0
+pyyaml>=6.0.1
+
+# --- Testing ---
+pytest>=8.0.0

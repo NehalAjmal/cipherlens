@@ -1,0 +1,30 @@
+# CipherLens — configs/default.yaml
+# All tunable thresholds, paths, and feature flags.
+# Matches BACKEND_SCHEMA.md §9 exactly.
+# Loaded by cipherlens/config.py into typed pydantic settings objects.
+
+execution:
+  parallel: true
+  device: "cpu"          # "cpu" | "cuda" (cuda optional, never required)
+
+thresholds:
+  spectral_signature_iqr_multiplier: 1.5
+  dedup_cosine_distance_max: 0.02
+  neural_cleanse_anomaly_index_min: 2.0
+  strip_perturbation_grid: 10
+  mmd_kernel_bandwidths: [1, 2, 4, 8, 16]
+  energy_ood_temperature: 1.0
+
+disposition:
+  severity_weight: { INFO: 0, LOW: 1, MEDIUM: 3, HIGH: 7, CRITICAL: 15 }
+  review_threshold: 5
+  quarantine_threshold: 12
+  critical_override_confidence: 0.9
+
+ledger:
+  checkpoint_every_n_entries: 25
+  db_path: "reports/ledger.sqlite3"
+
+paths:
+  backbone_cache: "models_cache/backbone/"
+  reports_dir: "reports/assurance/"

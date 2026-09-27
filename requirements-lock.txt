@@ -1,0 +1,6 @@
+# CipherLens — requirements-lock.txt
+# Exact pinned versions, generated once the stack is stable.
+# Run: pip freeze > requirements-lock.txt
+# Used for offline wheelhouse build — see docs/HUMAN_TASKS.md.
+#
+# This file is auto-generated in Phase 11. Do not edit manually.
