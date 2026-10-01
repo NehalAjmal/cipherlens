@@ -1,17 +1,36 @@
-#!/usr/bin/env python3
-"""Download reference backbone (ResNet-18 or MobileNetV3) for CipherLens.
+"""Script to download and cache a reference backbone model.
 
-This is a ONE-TIME setup script that requires internet access.
-It downloads pretrained weights from PyTorch Hub and caches them locally.
-Nothing inside cipherlens/ ever calls this script — it is run manually once.
-
-Usage:
-    python scripts/download_reference_backbone.py
-
-See docs/HUMAN_TASKS.md §3 for details.
+Downloads ResNet-18 from torchvision and saves it to models_cache/backbone/.
 """
 
-# Placeholder — implementation in Phase 3 (data integrity module).
-raise NotImplementedError(
-    "Backbone download not yet implemented. See PLAN.md Phase 3."
-)
+import os
+from pathlib import Path
+
+import torch
+import torchvision.models as models
+
+from cipherlens.utils.hashing import sha256_digest
+
+
+def main():
+    print("Downloading reference backbone (ResNet-18)...")
+    model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    
+    # We only need the state dict for inference/embedding extraction
+    state_dict = model.state_dict()
+    
+    out_dir = Path("models_cache/backbone")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "resnet18.pt"
+    
+    print(f"Saving to {out_path}...")
+    torch.save(state_dict, out_path)
+    
+    with open(out_path, "rb") as f:
+        digest = sha256_digest(f.read())
+        
+    print(f"Done. SHA-256: {digest}")
+
+
+if __name__ == "__main__":
+    main()
