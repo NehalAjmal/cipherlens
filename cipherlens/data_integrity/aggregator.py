@@ -68,4 +68,9 @@ def run_data_integrity_checks(dataset_items: list[DatasetItem], images_dir: str)
                 )
             )
 
+    logger.info("Running Sybil Identity Heuristics...")
+    from cipherlens.data_integrity.sybil import check_sybil_heuristics
+    sybil_findings = check_sybil_heuristics(dataset_items, findings)
+    findings.extend(sybil_findings)
+
     return findings
