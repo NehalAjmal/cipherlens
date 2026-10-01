@@ -49,23 +49,23 @@ def check_duplicates(dataset_items: list[DatasetItem], images_dir: str) -> list[
     # dists is shape (N, N)
     n = len(embeddings)
     
-    # To prevent flagging the same image against multiple things into separate findings unnecessarily,
-    # we can group them or emit a finding per pair.
-    # Emitting a finding per pair is straightforward.
-    for i in range(n):
-        for j in range(i + 1, n):
-            if dists[i, j] <= threshold:
-                finding = Finding(
-                    category="NEAR_DUPLICATE",
-                    severity="LOW",
-                    confidence=1.0 - float(dists[i, j]),
-                    reason=f"Near-duplicate images detected (distance {dists[i,j]:.4f} <= {threshold})",
-                    evidence={
-                        "cosine_distance": float(dists[i, j]),
-                        "threshold": float(threshold)
-                    },
-                    affected_elements=[item_ids[i], item_ids[j]],
-                )
-                findings.append(finding)
+    # Fast vectorized search instead of pure python double loop
+    np.fill_diagonal(dists, float('inf'))
+    indices = np.where(np.triu(dists <= threshold, k=1))
+    
+    for idx in range(len(indices[0])):
+        i, j = indices[0][idx], indices[1][idx]
+        finding = Finding(
+            category="NEAR_DUPLICATE",
+            severity="LOW",
+            confidence=1.0 - float(dists[i, j]),
+            reason=f"Near-duplicate images detected (distance {dists[i,j]:.4f} <= {threshold})",
+            evidence={
+                "cosine_distance": float(dists[i, j]),
+                "threshold": float(threshold)
+            },
+            affected_elements=[item_ids[i], item_ids[j]],
+        )
+        findings.append(finding)
 
     return findings

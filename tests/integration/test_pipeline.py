@@ -20,10 +20,12 @@ def test_pipeline_model_only(clean_model_path):
     if not Path(clean_model_path).exists():
         pytest.skip("Reference backbone not found.")
 
-    report = run_pipeline(
-        model_path=clean_model_path,
-        model_format="PYTORCH"
-    )
+    from unittest import mock
+    with mock.patch("cipherlens.ingestion.sandbox.run_in_docker_sandbox"):
+        report = run_pipeline(
+            model_path=clean_model_path,
+            model_format="PYTORCH"
+        )
     
     assert report is not None
     assert "report_id" in report

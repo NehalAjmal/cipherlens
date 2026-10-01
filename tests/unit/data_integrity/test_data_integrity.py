@@ -116,9 +116,9 @@ def test_contributor_aggregation(monkeypatch):
     def mock_checks(items, path):
         return [
             # 3 HIGH findings for the same contributor (contributor_1)
-            type("Finding", (), {"severity": "HIGH", "affected_elements": ["item_0"]})(),
-            type("Finding", (), {"severity": "HIGH", "affected_elements": ["item_1"]})(),
-            type("Finding", (), {"severity": "HIGH", "affected_elements": ["item_2"]})(),
+            type("Finding", (), {"category": "MOCK", "severity": "HIGH", "affected_elements": ["item_0"]})(),
+            type("Finding", (), {"category": "MOCK", "severity": "HIGH", "affected_elements": ["item_1"]})(),
+            type("Finding", (), {"category": "MOCK", "severity": "HIGH", "affected_elements": ["item_2"]})(),
         ]
         
     monkeypatch.setattr("cipherlens.data_integrity.aggregator.check_spectral_signatures", lambda x, y: [])

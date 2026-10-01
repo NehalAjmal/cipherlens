@@ -18,7 +18,9 @@ def clean_model_handle():
     model_path = Path("models_cache/backbone/resnet18.pt")
     if not model_path.exists():
         pytest.skip("Reference backbone not downloaded. Run scripts/download_reference_backbone.py.")
-    return load_model(str(model_path), "resnet18_clean", access_tier_available="WHITE_BOX")
+    from unittest import mock
+    with mock.patch("cipherlens.ingestion.sandbox.run_in_docker_sandbox"):
+        return load_model(str(model_path), "resnet18_clean", access_tier_available="WHITE_BOX")
 
 
 def test_access_tier_resolution(clean_model_handle):

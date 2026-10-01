@@ -29,7 +29,7 @@ def determine_access_tier(model_handle: ModelHandle, override: str | None = None
         tier = override
         
     # Phase 8: Intercept detectors before they reach white-box algorithms
-    if tier == "WHITE_BOX" and model_handle.format == "PYTORCH" and model_handle.model_obj is not None:
+    if tier == "WHITE_BOX" and model_handle.manifest.format == "PYTORCH" and model_handle.model_obj is not None:
         from cipherlens.model_integrity.detector_bridge import is_faster_rcnn, wrap_detector_if_needed
         import torch.nn as nn
         
