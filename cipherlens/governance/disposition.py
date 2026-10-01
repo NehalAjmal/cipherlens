@@ -11,6 +11,17 @@ from cipherlens.utils.logging_config import get_logger
 logger = get_logger(__name__)
 
 
+def compute_risk_score(findings: list[Finding]) -> float:
+    """Compute the weighted-sum risk score for a list of findings."""
+    config = get_config()
+    weights = config.disposition.severity_weight
+    risk_score = 0.0
+    for finding in findings:
+        weight = weights.get(finding.severity, 0)
+        risk_score += weight * finding.confidence
+    return risk_score
+
+
 def compute_overall_disposition(findings: list[Finding]) -> str:
     """Compute the overall disposition based on a weighted sum.
 
@@ -21,17 +32,13 @@ def compute_overall_disposition(findings: list[Finding]) -> str:
         "ACCEPT", "REVIEW", or "QUARANTINE".
     """
     config = get_config()
-    weights = config.disposition.severity_weight
     review_thresh = config.disposition.review_threshold
     quarantine_thresh = config.disposition.quarantine_threshold
     critical_override = config.disposition.critical_override_confidence
 
-    risk_score = 0.0
+    risk_score = compute_risk_score(findings)
 
     for finding in findings:
-        weight = weights.get(finding.severity, 0)
-        risk_score += weight * finding.confidence
-
         # Force override check
         if finding.severity == "CRITICAL" and finding.confidence >= critical_override:
             logger.warning(
