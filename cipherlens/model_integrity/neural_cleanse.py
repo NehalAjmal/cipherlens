@@ -65,23 +65,28 @@ def reconstruct_triggers(model_handle: ModelHandle) -> list[float]:
         logger.warning("Model is not a PyTorch nn.Module. Cannot run white-box Neural Cleanse.")
         return []
 
-    # Attempt to find the last linear layer to use as a proxy for class sensitivity
-    last_linear = None
+    # Attempt to find the last linear or 1x1 conv layer to use as a proxy for class sensitivity
+    last_layer = None
     for module in reversed(list(model.modules())):
         if isinstance(module, torch.nn.Linear):
-            last_linear = module
+            last_layer = module
+            break
+        elif isinstance(module, torch.nn.Conv2d):
+            last_layer = module
             break
             
-    if last_linear is None:
-        logger.warning("No linear layer found in model for proxy trigger reconstruction.")
+    if last_layer is None:
+        logger.warning("No suitable layer found in model for proxy trigger reconstruction.")
         # Return a uniform set of dummy sizes so anomaly index is 0
         return [10.0] * 10
 
     # The inverse of the L1 norm of the weights to a class can act as a crude
     # proxy for the trigger size (higher weights -> smaller trigger needed).
     with torch.no_grad():
-        weights = last_linear.weight  # shape: (out_features, in_features)
-        l1_norms = torch.norm(weights, p=1, dim=1)
+        weights = last_layer.weight  # shape: (out_features, in_features) or (out_features, in_features, 1, 1)
+        # Flatten spatial dims if it's a conv layer
+        weights_flat = weights.view(weights.size(0), -1)
+        l1_norms = torch.norm(weights_flat, p=1, dim=1)
         # Proxy trigger size: 1000 / (norm + epsilon)
         proxy_sizes = 1000.0 / (l1_norms + 1e-6)
         
