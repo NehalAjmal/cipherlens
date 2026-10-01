@@ -66,6 +66,19 @@ def load_model(
 
     if ext in {".pt", ".pth"}:
         manifest.format = "PYTORCH"
+        
+        from cipherlens.ingestion.sandbox import is_sandboxing_available, run_in_docker_sandbox
+        
+        if is_sandboxing_available():
+            try:
+                run_in_docker_sandbox(path, "PYTORCH")
+                logger.info("Sandbox pre-validation passed. Proceeding with host deserialization.")
+            except Exception as e:
+                logger.error("Sandbox execution blocked loading: %s", e)
+                raise ValueError(f"Sandboxing blocked model load (likely malicious): {e}") from e
+        else:
+            logger.warning("Sandboxing unavailable, falling back to safe-deserialization-only.")
+            
         try:
             # SECURITY INVARIANT: weights_only=True is mandatory for torch.load
             model_obj = torch.load(path, weights_only=True, map_location="cpu")
