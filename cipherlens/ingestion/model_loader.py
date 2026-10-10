@@ -21,6 +21,39 @@ from cipherlens.utils.logging_config import get_logger
 logger = get_logger(__name__)
 
 
+def safe_torch_load(
+    model_path: str | Path,
+    map_location: str = "cpu",
+    **kwargs,
+):
+    """Safely deserialize PyTorch model weights.
+
+    SECURITY INVARIANT: Enforces weights_only=True across all load sites
+    to prevent arbitrary code execution attacks from malicious pickles.
+
+    Args:
+        model_path: Path to the .pt or .pth file.
+        map_location: Target device for loading weights (defaults to 'cpu').
+        **kwargs: Additional arguments passed to torch.load.
+
+    Returns:
+        Deserialized model or state dictionary.
+
+    Raises:
+        ValueError: If loading fails or security restrictions reject the file.
+    """
+    path = Path(model_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Model file not found: {path}")
+
+    try:
+        # Load site: safe deserialization with weights_only=True enforced
+        return torch.load(path, weights_only=True, map_location=map_location, **kwargs)
+    except Exception as e:
+        logger.error("Safe model deserialization rejected file %s: %s", path, e)
+        raise ValueError(f"Safe model deserialization failed: {e}") from e
+
+
 def load_model(
     model_path: str | Path,
     model_id: str,
@@ -80,8 +113,8 @@ def load_model(
             logger.warning("Sandboxing unavailable, falling back to safe-deserialization-only.")
             
         try:
-            # SECURITY INVARIANT: weights_only=True is mandatory for torch.load
-            model_obj = torch.load(path, weights_only=True, map_location="cpu")
+            # SECURITY INVARIANT: safe_torch_load enforces weights_only=True
+            model_obj = safe_torch_load(path, map_location="cpu")
             
             # If it's a state dict, we don't have the architecture to compute parameters easily
             # If it's a full model, we can try

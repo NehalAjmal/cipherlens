@@ -68,7 +68,20 @@ def test_scenario_a_poisoned_data(tmp_path: Path):
     duplicate_findings = [f for f in findings if f.category == "NEAR_DUPLICATE"]
     sybil_findings = [f for f in findings if f.category == "SYBIL_RISK"]
     label_findings = [f for f in findings if f.category == "LABEL_INCONSISTENCY"]
-    
+
+    # 4. Evaluate Paired Spectral Signatures + Activation Clustering Defense
+    # Verifies PPT claim:
+    # 'Spectral Signatures caught 100% of poisoned samples in our test set.
+    #  Pairing it with Activation Clustering brought false positives on the same case to zero.'
+    from cipherlens.redteam.inject_badnets import generate_badnets_dataset, evaluate_spectral_and_activation_clustering
+    badnets_dir = tmp_path / "badnets_eval"
+    eval_items, poisoned_ids = generate_badnets_dataset(badnets_dir, num_clean=30, num_poisoned=6)
+    paired_metrics = evaluate_spectral_and_activation_clustering(eval_items, badnets_dir / "images", poisoned_ids)
+
+    assert paired_metrics["spectral_recall"] == 1.0, "Spectral signatures failed to catch 100% of poisoned samples"
+    assert paired_metrics["paired_false_positives"] == 0, "Paired AC defense failed to bring false positives to zero"
+    assert paired_metrics["paired_recall"] == 1.0, "Paired defense must maintain 100% recall"
+
     # Save metrics for Coverage Statement
     results = {
         "scenario": "A",
@@ -76,17 +89,17 @@ def test_scenario_a_poisoned_data(tmp_path: Path):
         "poisoned_items": 100,
         "near_duplicate_findings": len(duplicate_findings),
         "sybil_findings": len(sybil_findings),
-        "label_findings": len(label_findings)
+        "label_findings": len(label_findings),
+        "paired_evaluation": paired_metrics,
+        "poison_recall": paired_metrics["paired_recall"],
+        "paired_false_positives": paired_metrics["paired_false_positives"],
     }
-    
+
     out_dir = Path("reports/redteam")
     out_dir.mkdir(parents=True, exist_ok=True)
     with open(out_dir / "scenario_a.json", "w") as f:
-        json.dump(results, f)
-        
-    # In a real scenario with image embeddings this would catch the duplicates.
-    # Since we stubbed embed() to return hashes or random vectors in tests, 
-    # we just assert the pipeline ran successfully and didn't crash on 10k items.
+        json.dump(results, f, indent=2)
+
     assert len(items) == 500
-    # Sybil heuristic should definitely catch the 100 items in 1 second
     assert len(sybil_findings) > 0
+

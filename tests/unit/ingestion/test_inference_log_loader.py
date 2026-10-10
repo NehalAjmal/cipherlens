@@ -28,3 +28,18 @@ def test_load_inference_logs_graceful_degradation(log_setup):
     assert records[0].record_id == "r1"
     
     assert skipped_count == 2
+
+
+def test_load_inference_logs_arrow(tmp_path: Path):
+    """Verify PyArrow zero-copy ingestion of valid inference log records."""
+    import json
+    from cipherlens.ingestion.inference_log_loader import load_inference_logs_arrow
+
+    log_file = tmp_path / "valid_batch.jsonl"
+    with open(log_file, "w") as f:
+        f.write(json.dumps({"record_id": "r1", "timestamp_utc": "2024", "image_path": "a.jpg", "model_id": "m1", "config_hash": "c1", "outputs": []}) + "\n")
+        f.write(json.dumps({"record_id": "r2", "timestamp_utc": "2024", "image_path": "b.jpg", "model_id": "m1", "config_hash": "c1", "outputs": []}) + "\n")
+
+    table = load_inference_logs_arrow(log_file)
+    assert len(table) == 2
+

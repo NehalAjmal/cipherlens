@@ -47,8 +47,10 @@ def _init_classifier():
     _DEVICE = torch.device(device_str)
     
     # Load ResNet-18 WITH classification head for logits
+    # SECURITY INVARIANT: load site 3 - safe_torch_load enforces weights_only=True
+    from cipherlens.ingestion.model_loader import safe_torch_load
     model = models.resnet18(weights=None)
-    state_dict = torch.load(model_path, map_location="cpu", weights_only=True)
+    state_dict = safe_torch_load(model_path, map_location="cpu")
     model.load_state_dict(state_dict)
     
     model.to(_DEVICE)

@@ -88,6 +88,42 @@ def test_ledger_detects_tampering(ledger):
     assert corrupted == [2]
 
 
+def test_editing_record_2_of_3_in_merkle_ledger_localized_to_exact_index(ledger):
+    """Verify PPT claim: Editing record 2-of-3 in the Merkle ledger is localized to that exact index.
+
+    Inserts 3 valid records, tampers directly with record 2, and asserts that
+    verification reports index 2 specifically rather than a generic failure.
+    """
+    record1 = {"batch_id": "batch_001", "items": 100}
+    record2 = {"batch_id": "batch_002", "items": 150}
+    record3 = {"batch_id": "batch_003", "items": 200}
+
+    id1 = ledger.append_record(record1)
+    id2 = ledger.append_record(record2)
+    id3 = ledger.append_record(record3)
+
+    assert [id1, id2, id3] == [1, 2, 3]
+
+    # Pre-tamper integrity check passes
+    valid, corrupted = ledger.verify_integrity()
+    assert valid is True
+    assert corrupted == []
+
+    # Tamper with record 2 of 3 directly in the SQLite store
+    with sqlite3.connect(ledger.db_path) as conn:
+        conn.execute(
+            "UPDATE ledger_entries SET payload_json = ? WHERE id = 2",
+            ('{"batch_id": "batch_002_tampered", "items": 999}',)
+        )
+        conn.commit()
+
+    # Re-verify: must fail and explicitly localize to index 2
+    valid, corrupted = ledger.verify_integrity()
+    assert valid is False
+    assert corrupted == [2]
+
+
+
 def test_checkpoint_export(ledger, temp_db_path):
     """Verify checkpoint export produces a valid JSON file with correct root."""
     records = [{"val": i} for i in range(5)]

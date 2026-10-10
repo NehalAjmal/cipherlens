@@ -51,8 +51,9 @@ def _init_backbone():
     logger.info("Loading reference backbone from %s to %s", model_path, _DEVICE)
     model = models.resnet18(weights=None)
     
-    # SECURITY INVARIANT: weights_only=True
-    state_dict = torch.load(model_path, map_location="cpu", weights_only=True)
+    # SECURITY INVARIANT: load site 2 - safe_torch_load enforces weights_only=True
+    from cipherlens.ingestion.model_loader import safe_torch_load
+    state_dict = safe_torch_load(model_path, map_location="cpu")
     model.load_state_dict(state_dict)
     
     # Remove the classification head (fc layer) to get embeddings

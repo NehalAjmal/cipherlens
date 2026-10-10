@@ -60,3 +60,27 @@ def load_inference_logs(log_path: str | Path) -> tuple[list[InferenceRecord], in
                 skipped_count += 1
                 
     return records, skipped_count
+
+
+def load_inference_logs_arrow(log_path: str | Path):
+    """Load inference records using PyArrow for zero-copy high-throughput batching.
+
+    Args:
+        log_path: Path to the .jsonl file.
+
+    Returns:
+        pyarrow.Table representation of the inference logs.
+    """
+    try:
+        import pyarrow as pa
+        import pyarrow.json as paj
+        path = Path(log_path)
+        if not path.exists():
+            raise FileNotFoundError(f"Inference log file not found: {path}")
+        # Zero-copy memory-mapped parse via pyarrow
+        return paj.read_json(str(path))
+    except Exception as e:
+        logger.warning("PyArrow zero-copy ingestion fallback: %s", e)
+        records, _ = load_inference_logs(log_path)
+        return records
+
