@@ -7,8 +7,8 @@ def render_sidebar():
     """Renders the common sidebar elements across all pages."""
     with st.sidebar:
         # Title and static badge
-        st.markdown("<h1 style='color: #1F3864;'>CipherLens</h1>", unsafe_allow_html=True)
-        st.markdown("**100% Offline 🔒**")
+        st.title("CipherLens 🔍")
+        st.caption("🔒 **100% Offline • Air-Gapped CV Assurance**")
         st.divider()
 
         st.markdown("### Current Session")

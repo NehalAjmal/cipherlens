@@ -72,12 +72,22 @@ for idx, res in enumerate(verif["results"]):
     
     icon = "✅" if is_valid else "❌"
     
-    with st.expander(f"{icon} Record {r['record_id']} (Model: {r['model_id']}) - {r['timestamp']}"):
-        st.json(r)
+    rec_id = getattr(r, "record_id", None) or (r.get("record_id") if isinstance(r, dict) else f"rec_{idx}")
+    model_id = getattr(r, "model_id", None) or (r.get("model_id") if isinstance(r, dict) else "unknown")
+    timestamp = (
+        getattr(r, "timestamp_utc", None)
+        or getattr(r, "timestamp", None)
+        or (r.get("timestamp_utc") if isinstance(r, dict) else None)
+        or (r.get("timestamp") if isinstance(r, dict) else "N/A")
+    )
+    r_dict = r.to_dict() if hasattr(r, "to_dict") else (r if isinstance(r, dict) else getattr(r, "__dict__", {}))
+    
+    with st.expander(f"{icon} Record {rec_id} (Model: {model_id}) - {timestamp}"):
+        st.json(r_dict)
         
         if not is_valid:
             st.error("Signature verification failed for this record.")
-            btn_key = f"quar_{r['record_id']}"
+            btn_key = f"quar_{rec_id}"
             
             # Allow creating a manual finding
             if st.button("Quarantine this record", key=btn_key):
@@ -88,16 +98,16 @@ for idx, res in enumerate(verif["results"]):
                     category="PROVENANCE_TAMPERING",
                     severity="CRITICAL",
                     confidence=1.0,
-                    reason=f"Signature verification failed for record {r['record_id']}",
-                    affected_elements=[r["record_id"]],
-                    evidence={"record": r}
+                    reason=f"Signature verification failed for record {rec_id}",
+                    affected_elements=[rec_id],
+                    evidence={"record": r_dict}
                 )
                 
                 st.session_state.report_findings.append(finding)
                 
                 if "report_document" in st.session_state:
                     del st.session_state.report_document
-                st.toast(f"Quarantined record {r['record_id']}!", icon="🚨")
+                st.toast(f"Quarantined record {rec_id}!", icon="🚨")
 
 st.divider()
 

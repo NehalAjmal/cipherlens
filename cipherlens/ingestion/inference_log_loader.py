@@ -53,6 +53,9 @@ def load_inference_logs(log_path: str | Path) -> tuple[list[InferenceRecord], in
                         model_id=data["model_id"],
                         config_hash=data["config_hash"],
                         outputs=data["outputs"],
+                        signature=data.get("signature"),
+                        public_key=data.get("public_key"),
+                        raw_dict=data,
                     )
                 )
             except Exception as e:

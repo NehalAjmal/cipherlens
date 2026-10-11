@@ -150,27 +150,36 @@ def generate_provenance_record(
     return record
 
 
-def verify_provenance_record(record: dict[str, Any]) -> bool:
+def verify_provenance_record(record: Any) -> bool:
     """Verify a signed provenance record.
 
     Validates that the signature matches the canonicalized fields
     (excluding the signature field itself).
 
     Args:
-        record: The complete provenance record dictionary.
+        record: The complete provenance record dictionary or record object.
 
     Returns:
         True if valid, False otherwise.
     """
+    if isinstance(record, dict):
+        record_dict = record
+    elif hasattr(record, "to_dict") and callable(record.to_dict):
+        record_dict = record.to_dict()
+    elif hasattr(record, "__dict__"):
+        record_dict = {k: v for k, v in record.__dict__.items() if not k.startswith("_")}
+    else:
+        return False
+
     # Extract signature and base payload
-    signature_hex = record.get("signature")
+    signature_hex = record_dict.get("signature")
     if not signature_hex:
         return False
 
     # The payload to verify is the record without the 'signature' field
-    payload = {k: v for k, v in record.items() if k != "signature"}
-    public_key_pem = record.get("public_key")
+    payload = {k: v for k, v in record_dict.items() if k != "signature"}
+    public_key_pem = record_dict.get("public_key")
     if not public_key_pem:
-         return False
+        return False
 
     return verify_signature(payload, signature_hex, public_key_pem)

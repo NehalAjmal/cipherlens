@@ -92,7 +92,7 @@ with col2:
 with col3:
     st.markdown("#### Demo Tools")
     with st.container(border=True):
-        st.markdown("<span style='color: #C00000; font-weight: bold;'>Danger Zone</span>", unsafe_allow_html=True)
+        st.markdown(":red[**Danger Zone**]")
         if st.button("🔧 Simulate tampering (demo only)", help="Directly alters the SQLite payload of the last entry."):
             try:
                 import sqlite3

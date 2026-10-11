@@ -69,3 +69,34 @@ class InferenceRecord:
     model_id: str
     config_hash: str
     outputs: list[Any]
+    signature: str | None = None
+    public_key: str | None = None
+    raw_dict: dict[str, Any] | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to JSON-serializable dictionary."""
+        d = {
+            "record_id": self.record_id,
+            "timestamp_utc": self.timestamp_utc,
+            "image_path": self.image_path,
+            "model_id": self.model_id,
+            "config_hash": self.config_hash,
+            "outputs": self.outputs,
+        }
+        if self.signature is not None:
+            d["signature"] = self.signature
+        if self.public_key is not None:
+            d["public_key"] = self.public_key
+        return d
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """Dict-like access helper."""
+        return getattr(self, key, default)
+
+    def __getitem__(self, key: str) -> Any:
+        """Dict-like item access."""
+        if hasattr(self, key):
+            return getattr(self, key)
+        if key == "timestamp":
+            return self.timestamp_utc
+        raise KeyError(key)
