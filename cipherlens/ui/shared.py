@@ -43,7 +43,10 @@ def render_sidebar():
         st.divider()
         
         # Config hash indicator
+        root_path = Path(__file__).resolve().parents[2]
         config_path = Path("configs/default.yaml")
+        if not config_path.exists():
+            config_path = root_path / "configs" / "default.yaml"
         if config_path.exists():
             with open(config_path, "rb") as f:
                 config_hash = hashlib.sha256(f.read()).hexdigest()[:8]

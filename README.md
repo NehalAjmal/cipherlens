@@ -3,8 +3,8 @@
 # 🛡️ CIPHERLENS
 ### Trustworthy Computer Vision Integrity Assurance in Multi-Contributor Pipelines
 **Smart India Hackathon 2026** · *Problem Statement: SIH26228* · *Theme: Blockchain & Cybersecurity*
-
 <p align="center">
+  <a href="https://cipherlens.streamlit.app"><img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Streamlit App" /></a>
   <a href="docs/TRD.md"><img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11" /></a>
   <a href="docs/TRD.md"><img src="https://img.shields.io/badge/Runtime-100%25%20Air--Gapped-0E7090?style=for-the-badge&logo=shield&logoColor=white" alt="Air-Gapped" /></a>
   <a href="docs/BACKEND_SCHEMA.md"><img src="https://img.shields.io/badge/Crypto-Ed25519%20%2B%20Merkle-10B981?style=for-the-badge&logo=lock&logoColor=white" alt="Ed25519" /></a>
@@ -143,6 +143,21 @@ The interactive dashboard opens in your browser at `http://localhost:8501`:
 * **Inference Batch:** Provenance verification of predicted bounding boxes and cryptographic signatures.
 * **Assurance Report:** Schema-validated JSON report with weighted-sum risk scores and 3-tier disposition.
 * **Audit Ledger:** Append-only Merkle ledger inspection, tamper simulation, and checkpoint export.
+
+### 5. Deploy as Live Website (Streamlit Community Cloud)
+
+CipherLens is pre-configured for one-click hosting on **[Streamlit Community Cloud](https://share.streamlit.io)** with zero cloud costs or external API keys:
+
+1. Push this repository to GitHub: `https://github.com/NehalAjmal/cipherlens`
+2. Sign in at [share.streamlit.io](https://share.streamlit.io) with your GitHub account.
+3. Click **"New app"** and specify the deployment configuration:
+   * **Repository:** `NehalAjmal/cipherlens`
+   * **Branch:** `main`
+   * **Main file path:** `cipherlens/ui/streamlit_app.py`
+   * **App URL:** `cipherlens.streamlit.app` *(or custom subdomain)*
+4. Click **Deploy!**
+
+> **Air-Gapped Cloud Invariant:** The repository already contains `packages.txt` for Debian graphics runtime libraries (`libgl1`, `libglib2.0-0`), pre-cached backbone weights (`models_cache/backbone/resnet18.pt`), and self-healing SQLite demo ledgers. No external network requests are made during runtime assurance checks.
 
 ---
 

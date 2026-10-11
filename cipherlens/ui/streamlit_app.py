@@ -25,6 +25,15 @@ st.title("CipherLens — Trustworthy CV Integrity Assurance")
 st.markdown("Detect data poisoning, label flips, model backdoors, and distribution drift entirely offline.")
 st.divider()
 
+def resolve_path(p: str | Path) -> Path:
+    path = Path(p)
+    if path.exists():
+        return path
+    candidate = root_path / p
+    if candidate.exists():
+        return candidate
+    return path
+
 col1, col2, col3 = st.columns(3)
 
 # 1. Analyze a Dataset
@@ -36,10 +45,12 @@ with col1:
         ds_format = st.selectbox("Format", ["COCO", "YOLO"], key="ds_format")
         
         if st.button("Load Dataset", type="primary"):
-            if ds_path and img_dir and Path(ds_path).exists() and Path(img_dir).exists():
+            p_ds = resolve_path(ds_path)
+            p_img = resolve_path(img_dir)
+            if p_ds.exists() and p_img.exists():
                 st.session_state.loaded_dataset = {
-                    "path": Path(ds_path),
-                    "images_dir": Path(img_dir),
+                    "path": p_ds,
+                    "images_dir": p_img,
                     "format": ds_format
                 }
                 st.toast("Dataset loaded successfully!", icon="✅")
@@ -57,17 +68,18 @@ with col2:
         sim_blackbox = st.toggle("Simulate black-box access only", key="sim_blackbox")
         
         if st.button("Load Model", type="primary"):
-            if mdl_path and Path(mdl_path).exists():
-                ext = Path(mdl_path).suffix.lower()
+            p_mdl = resolve_path(mdl_path)
+            if mdl_path and p_mdl.exists():
+                ext = p_mdl.suffix.lower()
                 mdl_format = "PYTORCH" if ext in {".pt", ".pth"} else "ONNX"
                 tier_available = "BLACK_BOX" if (mdl_format == "ONNX" or sim_blackbox) else "WHITE_BOX"
                 
                 with st.spinner("Loading model to detect format..."):
                     try:
                         # Dry run load to confirm it's readable
-                        load_model(mdl_path, Path(mdl_path).name, access_tier_available=tier_available)
+                        load_model(str(p_mdl), p_mdl.name, access_tier_available=tier_available)
                         st.session_state.loaded_model = {
-                            "path": Path(mdl_path),
+                            "path": p_mdl,
                             "format": mdl_format,
                             "access_tier": tier_available
                         }
@@ -84,12 +96,13 @@ with col2:
 with col3:
     with st.container(border=True):
         st.subheader("Check an Inference Batch")
-        batch_path = st.text_input("Batch File (JSONL)", key="batch_path")
+        batch_path = st.text_input("Batch File (JSONL)", value="data/samples/sample_inference_batch.jsonl", key="batch_path")
         
         if st.button("Load Batch", type="primary"):
-            if batch_path and Path(batch_path).exists():
+            p_batch = resolve_path(batch_path)
+            if batch_path and p_batch.exists():
                 st.session_state.loaded_inference_batch = {
-                    "path": Path(batch_path)
+                    "path": p_batch
                 }
                 st.toast("Batch loaded successfully!", icon="✅")
             else:
@@ -106,11 +119,14 @@ if st.button("Run Full Demo"):
     with st.spinner("Running end-to-end pipeline on sample dataset..."):
         from cipherlens.pipeline import run_pipeline
         try:
+            p_demo_ds = resolve_path("data/samples/annotations/instances_samples.json")
+            p_demo_img = resolve_path("data/samples/images")
+            p_demo_mdl = resolve_path("data/samples/resnet50_clean.onnx")
             report = run_pipeline(
-                dataset_path="data/samples/annotations/instances_samples.json",
-                images_dir="data/samples/images",
+                dataset_path=str(p_demo_ds),
+                images_dir=str(p_demo_img),
                 dataset_format="COCO",
-                model_path="data/samples/resnet50_clean.onnx",
+                model_path=str(p_demo_mdl),
                 model_format="ONNX"
             )
             st.session_state.last_report_id = report["report_id"]

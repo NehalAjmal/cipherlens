@@ -19,7 +19,13 @@ render_sidebar()
 st.title("Audit Ledger")
 st.markdown("Cryptographically verifiable, append-only Merkle ledger of all assurance activities.")
 
-db_path = "reports/ledger.sqlite3"
+db_path = str(root_path / "reports" / "ledger.sqlite3")
+(root_path / "reports").mkdir(exist_ok=True)
+backup_db = root_path / "data" / "samples" / "demo_ledger_backup.sqlite3"
+if not Path(db_path).exists() and backup_db.exists():
+    import shutil
+    shutil.copy(str(backup_db), db_path)
+
 ledger = ProvenanceLedger(db_path=db_path)
 
 # 1. Load the ledger
@@ -65,8 +71,9 @@ with col1:
 with col2:
     st.markdown("#### Anchoring")
     if st.button("Export Checkpoint"):
-        checkpoint_path = f"reports/checkpoints/checkpoint_{int(time.time())}.json"
-        Path("reports/checkpoints").mkdir(parents=True, exist_ok=True)
+        cp_dir = root_path / "reports" / "checkpoints"
+        cp_dir.mkdir(parents=True, exist_ok=True)
+        checkpoint_path = cp_dir / f"checkpoint_{int(time.time())}.json"
         try:
             # Reconstruct current chain state
             tree = ledger.get_merkle_tree()
@@ -77,7 +84,7 @@ with col2:
             }
             with open(checkpoint_path, "w", encoding="utf-8") as f:
                 json.dump(state, f, indent=2)
-            st.success(f"Checkpoint exported to `{checkpoint_path}`")
+            st.success(f"Checkpoint exported to `{checkpoint_path.name}`")
             st.info("Copy this file to a second device or medium to complete the external-anchoring guarantee.")
         except Exception as e:
             st.error(f"Failed to export checkpoint: {e}")
@@ -109,9 +116,9 @@ with col3:
                 
         if st.button("Restore demo ledger"):
             import shutil
-            backup_path = "data/samples/demo_ledger_backup.sqlite3"
-            if Path(backup_path).exists():
-                shutil.copy(backup_path, db_path)
+            backup_path = root_path / "data" / "samples" / "demo_ledger_backup.sqlite3"
+            if backup_path.exists():
+                shutil.copy(str(backup_path), db_path)
                 st.toast("Ledger restored from demo backup.", icon="✅")
             else:
                 if Path(db_path).exists():

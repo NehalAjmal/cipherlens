@@ -138,7 +138,9 @@ with col2:
         if st.button("Sign & commit to Ledger", type="primary"):
             with st.spinner("Signing and committing to Ledger..."):
                 try:
-                    ledger = ProvenanceLedger(db_path="reports/ledger.sqlite3")
+                    db_path = str(root_path / "reports" / "ledger.sqlite3")
+                    (root_path / "reports").mkdir(exist_ok=True)
+                    ledger = ProvenanceLedger(db_path=db_path)
                     
                     # Ensure the report has the tamper record populated if it wasn't already
                     if "tamper_evident_audit_record" not in report:

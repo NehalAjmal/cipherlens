@@ -22,8 +22,10 @@ pillow>=10.0.0
 # --- Crypto & integrity ---
 cryptography>=42.0.0
 
-# --- UI ---
+# --- UI & Data ---
 streamlit>=1.32.0
+pandas>=2.0.0
+pyarrow>=14.0.0
 
 # --- Validation & config ---
 jsonschema>=4.21.0

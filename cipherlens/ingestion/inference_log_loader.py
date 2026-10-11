@@ -84,3 +84,7 @@ def load_inference_logs_arrow(log_path: str | Path):
         records, _ = load_inference_logs(log_path)
         return records
 
+
+# Alias for compatibility with ui/pages/3_Inference_Batch.py
+load_inference_batch = load_inference_logs
+

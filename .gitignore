@@ -26,6 +26,8 @@ htmlcov/
 data/raw/
 models_cache/*
 !models_cache/README.md
+!models_cache/backbone/
+!models_cache/backbone/resnet18.pt
 reports/*
 !reports/README.md
 wheelhouse/
