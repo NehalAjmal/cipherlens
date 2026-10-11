@@ -11,7 +11,6 @@ torchvision>=0.17.0
 onnxruntime>=1.18.0
 onnx>=1.15.0
 adversarial-robustness-toolbox>=1.17.0
-alibi-detect>=0.12.0
 scikit-learn>=1.4.0
 scipy>=1.11.0
 numpy>=1.26.0
