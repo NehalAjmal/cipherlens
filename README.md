@@ -6,6 +6,7 @@
 
 <p align="center">
   <a href="https://cipherlens.streamlit.app"><img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Streamlit App" /></a>
+  <br/>
   <a href="docs/TRD.md"><img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11" /></a>
   <a href="docs/TRD.md"><img src="https://img.shields.io/badge/Runtime-100%25%20Air--Gapped-0E7090?style=for-the-badge&logo=shield&logoColor=white" alt="Air-Gapped" /></a>
   <a href="docs/BACKEND_SCHEMA.md"><img src="https://img.shields.io/badge/Crypto-Ed25519%20%2B%20Merkle-10B981?style=for-the-badge&logo=lock&logoColor=white" alt="Ed25519" /></a>
